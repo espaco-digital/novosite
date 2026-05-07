@@ -1,13 +1,332 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espaço Digital - Site Pessoal de Wesley</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX compilation in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion CDN -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #2F3D48; }
+        ::-webkit-scrollbar-thumb { background: #6c7c89; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8495a3; }
+        .selection\:bg-\[\#6c7c89\] ::selection { background-color: #6c7c89; color: white; }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#2F3D48',
+                            muted: '#4a5e6c',
+                            accent: '#6c7c89',
+                            text: '#cfdde9',
+                            subtle: '#a0aec0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#2F3D48] text-[#cfdde9] selection:bg-[#6c7c89] selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // Ícones em SVG para evitar problemas de carregamento
+        const Icons = {
+            Instagram: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+            Facebook: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
+            Youtube: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 2-2 69.44 69.44 0 0 1 15 0 2 2 0 0 1 2 2 24.12 24.12 0 0 1 0 10 2 2 0 0 1-2 2 69.44 69.44 0 0 1-15 0 2 2 0 0 1-2-2Z"/><path d="m9.75 15.02 5.75-3.02-5.75-3.02V15.02Z"/></svg>,
+            MessageCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>,
+            Mail: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+            ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            Shuffle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>,
+            Gamepad2: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="17" cy="11" r="1"/><circle cx="15" cy="9" r="1"/></svg>,
+            ImageIcon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
+            Video: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>,
+            ArrowUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+        };
+
+        const INITIAL_POSTS = [
+            { id: 'post_octopus', title: "O Mimetismo dos Polvos", content: "Os polvos são verdadeiros mestres do disfarce. Eles possuem células especializadas chamadas cromatóforos, que permitem mudar a cor, o padrão e até a textura da pele em menos de um segundo." },
+            { id: 'post_1', title: "A Memória dos Corvos", content: "Os corvos são extremamente inteligentes e conseguem reconhecer e lembrar de rostos humanos. Se uma pessoa os ameaçar, eles não apenas guardarão rancor por anos, como também irão comunicar isso ao resto do bando." },
+            { id: 'post_2', title: "O Uivo dos Lobos", content: "Ao contrário da imagem clássica dos cinemas, os lobos não uivam para a lua cheia. Eles uivam para se comunicar: seja para reunir a matilha, alertar rivais sobre os limites de seu território." },
+            { id: 'post_3', title: "O Sono dos Golfinhos", content: "Golfinhos têm uma forma de dormir fascinante chamada sono uni-hemisférico. Eles literalmente desligam apenas metade do cérebro por vez, enquanto a outra metade permanece alerta." }
+        ];
+
+        const LEGENDAS_CASUAIS = [
+            "Testando roupas e técnicas de edição ao mesmo tempo.",
+            "Treinando com o irmão no Arsenal Maromba.",
+            "Resenha com os amigos no apê do Lucas transformado em anime.",
+            "Trilha do Guardião em Queluz.",
+            "Mais um dia de forró com os amigos."
+        ];
+
+        const FOTOS_DATA = Array.from({ length: 8 }, (_, i) => `https://picsum.photos/seed/ed_${i}/800/600`);
+
+        function App() {
+            const [tabIndex, setTabIndex] = useState(0);
+            const [heroTextIdx, setHeroTextIdx] = useState(0);
+            const heroTitles = ["Seja Bem Vindo(a) ao", "Site Pessoal de Wesley!"];
+
+            const [posts, setPosts] = useState(INITIAL_POSTS);
+            const [isSobreOpen, setIsSobreOpen] = useState(false);
+            const [isMidiasOpen, setIsMidiasOpen] = useState(false);
+            const [showEmBreve, setShowEmBreve] = useState(false);
+            const [fotosGroup, setFotosGroup] = useState(0);
+            const [videosGroup, setVideosGroup] = useState(0);
+            const [isFotosOpen, setIsFotosOpen] = useState(false);
+            const [isVideosOpen, setIsVideosOpen] = useState(false);
+            const [isJogosOpen, setIsJogosOpen] = useState(false);
+            const [lightboxImg, setLightboxImg] = useState(null);
+            const [lightboxPost, setLightboxPost] = useState(null);
+            const [showScrollTop, setShowScrollTop] = useState(false);
+            const [showPopup, setShowPopup] = useState(null);
+
+            useEffect(() => {
+                const interval = setInterval(() => setHeroTextIdx((prev) => (prev + 1) % heroTitles.length), 3000);
+                return () => clearInterval(interval);
+            }, []);
+
+            useEffect(() => {
+                const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const shufflePosts = () => {
+                const newPosts = [...posts].sort(() => Math.random() - 0.5);
+                setPosts(newPosts);
+            };
+
+            const triggerEmBreve = () => {
+                setShowEmBreve(true);
+                setTimeout(() => setShowEmBreve(false), 2000);
+            };
+
+            const scrollToSection = (id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const headerOffset = 100;
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+                setIsMidiasOpen(false);
+            };
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+                alert('Copiado para a área de transferência!');
+                setShowPopup(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-[#2F3D48] text-[#cfdde9] font-sans pb-20 relative overflow-x-hidden">
+                    {/* Background Pattern */}
+                    <div className="fixed inset-0 pointer-events-none opacity-10" 
+                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")` }} 
+                    />
+
+                    {/* Header */}
+                    <header className="sticky top-0 z-50 bg-[#2F3D48]/70 backdrop-blur-md px-4 pt-[10px] pb-[4px] shadow-lg border-b border-white/5">
+                        <div className="max-w-3xl mx-auto flex flex-col gap-4 text-center">
+                            <div className="flex items-center justify-center relative w-full h-9">
+                                <div className="flex-1 flex bg-[#4a5e6c] rounded-lg overflow-hidden h-full shadow-inner p-1 max-w-[800px] w-full">
+                                    <button onClick={() => setTabIndex(0)} className={`flex-1 rounded-md text-sm font-semibold transition-all ${tabIndex === 0 ? 'bg-[#6c7c89] text-white shadow' : 'text-[#a0aec0] hover:text-white'}`}>Inicial</button>
+                                    <div className="w-24 shrink-0" />
+                                    <button onClick={() => setTabIndex(1)} className={`flex-1 rounded-md text-sm font-semibold transition-all ${tabIndex === 1 ? 'bg-[#6c7c89] text-white shadow' : 'text-[#a0aec0] hover:text-white'}`}>Posts</button>
+                                </div>
+                                <button className="absolute left-1/2 -translate-x-1/2 z-10 bg-[#6c7c89] hover:bg-[#8495a3] text-white px-4 h-7 rounded-lg text-sm font-bold shadow-md transition-all active:scale-95 border border-white/10">Entrar</button>
+                            </div>
+
+                            <nav className="flex justify-center gap-3 pt-0 -mt-3 relative">
+                                <button onClick={triggerEmBreve} className="bg-[#4a5e6c]/80 hover:bg-[#6c7c89] px-6 h-7 rounded-full text-sm font-medium transition-all border border-white/10 -mr-2.5">Portfólio</button>
+                                <button onClick={() => scrollToSection('contato')} className="bg-[#4a5e6c]/80 hover:bg-[#6c7c89] w-10 h-7 rounded-full transition-all border border-white/10 flex items-center justify-center"><Icons.Mail /></button>
+                                <div className="relative">
+                                    <button onClick={() => setIsMidiasOpen(!isMidiasOpen)} className="bg-[#4a5e6c]/80 hover:bg-[#6c7c89] px-6 h-7 rounded-full text-sm font-medium transition-all border border-white/10 -ml-2.5">Mídias</button>
+                                    <AnimatePresence>
+                                        {isMidiasOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-[-1]" onClick={() => setIsMidiasOpen(false)} />
+                                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#4a5e6c] rounded-xl shadow-2xl border border-white/10 overflow-hidden min-w-[120px] z-50">
+                                                    {['Fotos', 'Vídeos', 'Jogos'].map((item) => (
+                                                        <button key={item} onClick={() => scrollToSection(item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))} className="w-full text-left px-4 py-2 text-sm hover:bg-[#6c7c89] transition-colors text-[#cfdde9] hover:text-white font-medium">{item}</button>
+                                                    ))}
+                                                </motion.div>
+                                            </>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </nav>
+                        </div>
+                    </header>
+
+                    <main className="w-full mt-8">
+                        <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${tabIndex * 50}%)`, width: '200%' }}>
+                            {/* ABA INICIAL */}
+                            <div className="w-1/2 flex-shrink-0 px-4 space-y-6">
+                                <section className="text-center pb-6">
+                                    <motion.p animate={{ scale: [1, 1.05, 1], opacity: [0.9, 1, 0.9] }} transition={{ duration: 2, repeat: Infinity }} className="font-serif text-5xl font-bold text-white drop-shadow-lg mb-2">Espaço Digital</motion.p>
+                                    <h1 className="text-brand-subtle text-sm">
+                                        <AnimatePresence mode="wait">
+                                            <motion.span key={heroTextIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{heroTitles[heroTextIdx]}</motion.span>
+                                        </AnimatePresence>
+                                    </h1>
+                                </section>
+
+                                <section className="max-w-3xl mx-auto">
+                                    <h2 className="font-serif text-2xl font-bold text-brand-subtle cursor-pointer hover:text-white mb-2" onClick={() => setIsSobreOpen(!isSobreOpen)}>Descrição</h2>
+                                    <div className="relative">
+                                        <img src="https://raw.githubusercontent.com/espaco-digital/espaco-digital.github.io/main/espacodigital/imagens/minhafoto.png" className="absolute bottom-full right-0 w-24 z-10 -mb-4" />
+                                        <motion.div animate={{ height: isSobreOpen ? 'auto' : '165px' }} onClick={() => setIsSobreOpen(!isSobreOpen)} className="bg-brand-muted p-5 rounded-[20px] shadow-lg overflow-hidden cursor-pointer relative">
+                                            <div className="space-y-4 leading-relaxed">
+                                                <p>Página pessoal, mas também profissional. Feita para livre-expressão, exposição de fotos, vídeos, projetos e portfólios em andamento.</p>
+                                                <div className="pt-4 border-t border-white/5">
+                                                    <h3 className="font-bold text-brand-subtle mb-2 text-lg">Sobre Mim</h3>
+                                                    <p>Tenho noções de design gráfico, embora seja mais dedicado à edição de vídeo. Sou entusiasta das IAs. Gosto de dançar a dois, práticas outdoor, e explorar novas tecnologias.</p>
+                                                </div>
+                                            </div>
+                                            {!isSobreOpen && <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-brand-muted to-transparent rounded-b-[20px]" />}
+                                        </motion.div>
+                                    </div>
+                                </section>
+
+                                <section id="fotos" className="max-w-3xl mx-auto">
+                                    <h2 className="font-serif text-2xl font-bold text-brand-subtle cursor-pointer hover:text-white" onClick={() => setIsFotosOpen(!isFotosOpen)}>Fotos</h2>
+                                    <div className="bg-brand-muted rounded-[20px] shadow-lg overflow-hidden">
+                                        <div className="p-3 flex items-center justify-between">
+                                            <button onClick={(e) => { e.stopPropagation(); setFotosGroup(prev => 1 - prev); }}><Icons.ChevronLeft /></button>
+                                            <div className="text-brand-subtle text-sm font-light">{fotosGroup === 0 ? 'Casuais' : 'Portifólio'}</div>
+                                            <button onClick={(e) => { e.stopPropagation(); setFotosGroup(prev => 1 - prev); }}><Icons.ChevronRight /></button>
+                                        </div>
+                                        <AnimatePresence>
+                                            {isFotosOpen && (
+                                                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="p-5 overflow-hidden">
+                                                    {fotosGroup === 0 ? (
+                                                        <div className="flex gap-4 overflow-x-auto pb-4">
+                                                            {FOTOS_DATA.map((foto, i) => (
+                                                                <div key={i} className="flex-none w-64">
+                                                                    <img src={foto} className="h-80 w-full object-cover rounded-xl shadow-lg cursor-pointer" onClick={() => setLightboxImg(foto)} />
+                                                                    <p className="mt-2 text-sm text-center text-brand-subtle">{LEGENDAS_CASUAIS[i]}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : <div className="py-10 text-center">Em breve...</div>}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </section>
+
+                                <section id="videos" className="max-w-3xl mx-auto">
+                                    <h2 className="font-serif text-2xl font-bold text-brand-subtle cursor-pointer hover:text-white" onClick={() => setIsVideosOpen(!isVideosOpen)}>Vídeos</h2>
+                                    <div className="bg-brand-muted rounded-[20px] shadow-lg overflow-hidden">
+                                        <div className="p-3 text-center text-brand-subtle text-sm">{videosGroup === 0 ? 'Dança' : 'Portifólio'}</div>
+                                        <AnimatePresence>
+                                            {isVideosOpen && (
+                                                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="p-5 overflow-hidden">
+                                                    <div className="flex gap-4 overflow-x-auto">
+                                                        {["https://www.youtube.com/embed/mw86Wn5zDzM", "https://www.youtube.com/embed/ncMmDCHRHpU"].map((src, i) => (
+                                                            <iframe key={i} src={src} className="flex-none w-64 aspect-[9/16] rounded-xl" allowFullScreen />
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </section>
+
+                                <section id="contato" className="max-w-3xl mx-auto pb-10">
+                                    <h2 className="font-serif text-2xl font-bold text-brand-subtle">Contato</h2>
+                                    <div className="bg-brand-muted p-6 rounded-[20px] flex justify-center gap-4 flex-wrap">
+                                        <SocialBtn color="bg-green-600" onClick={() => setShowPopup({type:'whatsapp', value:'12997558993'})} icon={<Icons.MessageCircle />} />
+                                        <SocialBtn color="bg-red-500" onClick={() => setShowPopup({type:'email', value:'wesley.anunnaki@gmail.com'})} icon={<Icons.Mail />} />
+                                        <SocialBtn color="bg-pink-600" onClick={() => window.open('https://instagram.com/wesley.buenno')} icon={<Icons.Instagram />} />
+                                    </div>
+                                </section>
+                            </div>
+
+                            {/* ABA POSTS */}
+                            <div className="w-1/2 flex-shrink-0 px-4 space-y-6 py-8">
+                                <div className="max-w-3xl mx-auto space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="font-serif text-2xl font-bold text-brand-subtle">Postagens</h2>
+                                        <button onClick={shufflePosts} className="bg-brand-muted p-2 rounded-full"><Icons.Shuffle /></button>
+                                    </div>
+                                    {posts.map(post => (
+                                        <div key={post.id} onClick={() => setLightboxPost(post)} className="bg-brand-muted p-6 rounded-[20px] cursor-pointer hover:border-white/20 border border-transparent transition-all">
+                                            <h3 className="font-serif text-xl font-bold text-white mb-2">{post.title}</h3>
+                                            <p className="line-clamp-2">{post.content}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Modais, Toasts, etc */}
+                    <AnimatePresence>
+                        {lightboxImg && (
+                            <motion.div onClick={() => setLightboxImg(null)} className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
+                                <img src={lightboxImg} className="max-w-full max-h-full rounded-lg" />
+                            </motion.div>
+                        )}
+                        {showEmBreve && (
+                            <motion.div initial={{scalse:0.8}} animate={{scale:1}} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-dark p-6 rounded-2xl z-[200] border border-white/20 text-xl font-bold">Em breve!</motion.div>
+                        )}
+                        {showPopup && (
+                            <motion.div onClick={() => setShowPopup(null)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                                <div className="bg-brand-muted p-8 rounded-3xl text-center" onClick={e=>e.stopPropagation()}>
+                                    <p className="mb-4 font-bold">Deseja copiar ou abrir?</p>
+                                    <div className="flex flex-col gap-2">
+                                        <button onClick={() => copyToClipboard(showPopup.value)} className="bg-brand-accent p-3 rounded-xl">Copiar</button>
+                                        <button onClick={() => window.open(showPopup.type==='whatsapp' ? `https://wa.me/55${showPopup.value}` : `mailto:${showPopup.value}`)} className="bg-white/10 p-3 rounded-xl">Abrir</button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        const SocialBtn = ({ color, onClick, icon }) => (
+            <button onClick={onClick} className={`${color} w-14 h-14 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110 active:scale-95`}>{icon}</button>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
